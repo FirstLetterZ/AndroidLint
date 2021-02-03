@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+dependencies {
+    compileOnly "com.android.tools.lint:lint-api:27.1.2"
+    compileOnly "com.android.tools.lint:lint-checks:27.1.2"
+}
+
+jar {
+    manifest {
+        attributes('Lint-Registry': 'com.zpf.lintrule.MyIssueRegistry')
+    }
+}

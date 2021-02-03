@@ -1,0 +1,4 @@
+include ':app'
+include ':lintrule'
+include ':lintLib'
+rootProject.name = "AndroidLint"
