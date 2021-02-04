@@ -1,0 +1,22 @@
+apply plugin: 'groovy'
+apply plugin:'maven'
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:4.1.1'
+}
+sourceSets {
+    main {
+        //指定资源文件夹
+        resources.srcDirs = ['src/main/resources', 'src/main/java']
+    }
+}
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: uri('../repo'))
+        pom.groupId = 'com.zpf.plugin'//包名
+        pom.artifactId = 'check'//在需要引用插件时用到
+        pom.version = '0.0.17'
+    }
+}

@@ -1,3 +1,4 @@
+include ':lintPlugin'
 include ':app'
 include ':lintrule'
 include ':lintLib'
