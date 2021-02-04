@@ -24,8 +24,8 @@ public class LogDetector extends Detector implements Detector.UastScanner{
 
     public static final Issue ISSUE = Issue.create(
             "LogUsage",
-            "避免使用android.util.Log",
-            "请使用统一的日志工具类!",
+            "閬垮厤浣跨敤android.util.Log",
+            "璇蜂娇鐢ㄧ粺涓�鐨勬棩蹇楀伐鍏风被!",
             Category.CORRECTNESS,
             6,
             Severity.ERROR,
@@ -69,7 +69,7 @@ public class LogDetector extends Detector implements Detector.UastScanner{
                         context.report(ISSUE,
                                 node,
                                 context.getLocation(node),
-                                "\u21E2 避免使用android.util.Log"
+                                "\u21E2 閬垮厤浣跨敤android.util.Log"
                         );
                     }
                 }

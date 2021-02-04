@@ -11,7 +11,7 @@ public class LintTestActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_lint);
-        Log.e("TEST", "log test");
+        Log.w("TEST", "log test");
         new Thread(new Runnable() {
             @Override
             public void run() {
