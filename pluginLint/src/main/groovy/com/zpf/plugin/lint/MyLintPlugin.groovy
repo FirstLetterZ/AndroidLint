@@ -10,7 +10,7 @@ import org.gradle.api.tasks.TaskState
 
 class MyLintPlugin implements Plugin<Project> {
 
-    private static boolean hasCheckHookFile = false
+    private static long lastCheck = 0L
 
     @Override
     void apply(Project project) {
@@ -18,7 +18,7 @@ class MyLintPlugin implements Plugin<Project> {
         if (androidVariants != null) {
             applyTask(project, androidVariants)
         }
-        if (!hasCheckHookFile) {
+        if (System.currentTimeMillis() - lastCheck > 600000) {
             checkGitHookFile(project)
         }
     }
@@ -58,12 +58,12 @@ class MyLintPlugin implements Plugin<Project> {
                     OutputStream outputStream = new FileOutputStream(prePushHookFile)
                     IOUtils.writeToFile(inputStream, outputStream)
                     println("copy pre-push success")
-                    hasCheckHookFile = true
+                    lastCheck = System.currentTimeMillis()
                 } catch (Exception ignored) {
                     println("copy pre-push failed!")
                 }
             } else {
-                hasCheckHookFile = true
+                lastCheck = System.currentTimeMillis()
             }
         }
     }
