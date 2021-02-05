@@ -2,7 +2,7 @@
 
 project_path=$(dirname $(dirname $(dirname "$0")))
 echo "project_path="$project_path
-cd $SCRIPT_PATH
+cd $project_path
 
 os_type=$(uname -s)
 if [[ $os_type =~ "MINGW" || $os_type =~ "Window" ]]; then
@@ -15,15 +15,19 @@ fi
 echo "os_type="$os_type
 
 if [[ "Window" == $os_type ]]; then
-  cd ${SCRIPT_PATH,0,2}
+  cd ${project_path,0,2}
 fi
-./gradlew lintForArchon
 
+./gradlew lintForArchon
 if [ $? -eq 0 ]; then
   echo "gradle task build successful"
   exit 0
 else
   echo "gradle task build failed"
+  cat <<\EOF
+Error: Failed to through the lint test(task lintForArchon).
+See lint-report/lint-report.html for more details.
+EOF
   exit 1
 fi
 
