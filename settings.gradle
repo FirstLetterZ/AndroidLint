@@ -1,5 +1,6 @@
-include ':lintPlugin'
+include ':app2'
 include ':app'
 include ':lintrule'
 include ':lintLib'
+include ':pluginLint'
 rootProject.name = "AndroidLint"

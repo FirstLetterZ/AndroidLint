@@ -16,7 +16,7 @@ import org.jetbrains.uast.UImportStatement;
 
 import java.util.Arrays;
 import java.util.List;
-
+@SuppressWarnings("UnstableApiUsage")
 public class PrintStackTraceDetector extends com.android.tools.lint.detector.api.Detector
         implements com.android.tools.lint.detector.api.Detector.UastScanner {
 
@@ -37,9 +37,7 @@ public class PrintStackTraceDetector extends com.android.tools.lint.detector.api
                                 @NotNull UCallExpression node,
                                 @NotNull PsiMethod method) {
         if (context.getEvaluator().isMemberInClass(method, "java.lang.Throwable")) {
-            /*
-            报告该问题
-             */
+            //报告该问题
             context.report(ISSUE,
                     method,
                     context.getLocation(node),

@@ -6,11 +6,11 @@ import com.android.build.gradle.LibraryExtension
 import com.android.build.gradle.api.BaseVariant
 import com.android.build.gradle.tasks.LintBaseTask
 import org.gradle.api.*
-import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
+import org.gradle.api.tasks.TaskState
 
 class MyLintPlugin implements Plugin<Project> {
 
-//    private static boolean hasCheckHookFile = false
+    private static boolean hasCheckHookFile = false
 
     @Override
     void apply(Project project) {
@@ -18,9 +18,9 @@ class MyLintPlugin implements Plugin<Project> {
         if (androidVariants != null) {
             applyTask(project, androidVariants)
         }
-//        if (!hasCheckHookFile) {
-        checkGitHookFile(project)
-//        }
+        if (!hasCheckHookFile) {
+            checkGitHookFile(project)
+        }
     }
 
     private static DomainObjectSet<BaseVariant> getAndroidVariants(Project project) {
@@ -38,11 +38,11 @@ class MyLintPlugin implements Plugin<Project> {
     }
 
     /**
-     * 查找并复制pre-push.sh文件
+     * 查找并复制pre-push文件
      * @param project
      */
     private static void checkGitHookFile(Project project) {
-        println("search and copy pre-push.sh")
+        println("search and copy pre-push")
         def rootFile = project.getRootDir()
         def gitFile = new File(rootFile, ".git")
         if (!gitFile.exists()) {
@@ -50,33 +50,30 @@ class MyLintPlugin implements Plugin<Project> {
         }
         println(".git file exists=" + gitFile.exists())
         if (gitFile.exists()) {
-            def prePushHookFile = new File(gitFile, "hooks/pre-push.sh")
+            def prePushHookFile = new File(gitFile, "hooks/pre-push")
             if (!prePushHookFile.exists() || prePushHookFile.length() == 0) {
-                println("start copy pre-push.sh")
+                println("start copy pre-push")
                 try {
-                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/pre-push.sh")
+                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/pre-push")
                     OutputStream outputStream = new FileOutputStream(prePushHookFile)
                     IOUtils.writeToFile(inputStream, outputStream)
-                    println("copy pre-push.sh success")
+                    println("copy pre-push success")
+                    hasCheckHookFile = true
                 } catch (Exception ignored) {
-                    println("copy pre-push.sh failed!")
+                    println("copy pre-push failed!")
                 }
+            } else {
+                hasCheckHookFile = true
             }
         }
     }
 
     private void applyTask(Project project, DomainObjectSet<BaseVariant> variants) {
-//        project.dependencies {
-//            if (project.getPlugins().hasPlugin('com.android.application')) {
-//                implementation project(':lintLib') {
-//                    force = true
-//                }
-//            } else {
-//                implementation project(':lintLib') {
-//                    force = true
-//                }
-//            }
-//        }
+        project.dependencies {
+            implementation("com.zpf.android:tool-lint:latest.integration") {
+                force = true
+            }
+        }
         project.configurations.all {
             resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
         }
@@ -92,9 +89,11 @@ class MyLintPlugin implements Plugin<Project> {
             lintOptions.htmlReport = true
             lintOptions.htmlOutput = project.file("${project.projectDir}/lint-report/lint-report.html")
             lintOptions.xmlReport = false
+            def hasCustomLint = lintFile.exists()
             lintTask.doFirst {
-                println("lintFile.exists()=" + lintFile.exists())
-                if (!lintFile.exists()) {
+                hasCustomLint = lintFile.exists()
+                println("hasCustomLint=" + hasCustomLint)
+                if (!hasCustomLint) {
                     try {
                         InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/lint.xml")
                         OutputStream outputStream = new FileOutputStream(lintFile)
@@ -105,9 +104,16 @@ class MyLintPlugin implements Plugin<Project> {
                     }
                 }
             }
+            project.gradle.taskGraph.afterTask { task, TaskState state ->
+                if (task == lintTask) {
+                    if (!hasCustomLint && lintFile != null && lintFile.exists()) {
+                        lintFile.delete()
+                    }
+                }
+            }
             if (!archonTaskExists) {
                 archonTaskExists = true
-                println("make lintForArchon")
+                println("create lintForArchon task")
                 project.task("lintForArchon").dependsOn lintTask
             }
         }

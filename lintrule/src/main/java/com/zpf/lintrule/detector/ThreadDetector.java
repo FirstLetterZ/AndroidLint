@@ -27,7 +27,7 @@ public class ThreadDetector extends Detector implements Detector.UastScanner {
     public static final Issue ISSUE = Issue.create(
             "ThreadUsage",
             "Thread Usage",
-            "Please use ThreadPool,such as AsyncTask.SERIAL_EXECUTOR",
+            "Please use ThreadPool",
             Category.CORRECTNESS,
             6,
             Severity.ERROR,

@@ -1,0 +1,24 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply from: "../pluginBintray.gradle"
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation 'com.android.tools.build:gradle:4.1.2'
+}
+sourceSets {
+    main {
+        //指定资源文件夹,不写这一行可能会导致getResourceAsStream为null
+        resources.srcDirs = ['src/main/resources', 'src/main/java']
+    }
+}
+//发布到本地
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        repository(url: uri('../repo'))
+//        pom.groupId = 'com.zpf.plugin'//包名
+//        pom.artifactId = 'android-check'//在需要引用插件时用到
+//        pom.version = '0.0.7'
+//    }
+//}
