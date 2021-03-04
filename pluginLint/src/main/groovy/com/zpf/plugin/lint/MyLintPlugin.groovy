@@ -9,7 +9,6 @@ import org.gradle.api.*
 import org.gradle.api.tasks.TaskState
 
 class MyLintPlugin implements Plugin<Project> {
-
     private static long lastCheck = 0L
 
     @Override
@@ -19,11 +18,13 @@ class MyLintPlugin implements Plugin<Project> {
             applyTask(project, androidVariants)
         }
         if (System.currentTimeMillis() - lastCheck > 600000) {
+            //检查git hook文件是否复制到了指定位置
             checkGitHookFile(project)
         }
     }
 
     private static DomainObjectSet<BaseVariant> getAndroidVariants(Project project) {
+        //只有使用了com.android.library或com.android.application插件的工程lint规则才起作用
         def extension = project.extensions.findByName("android") as BaseExtension
         if (extension == null) {
             return null
@@ -39,7 +40,6 @@ class MyLintPlugin implements Plugin<Project> {
 
     /**
      * 查找并复制pre-push文件
-     * @param project
      */
     private static void checkGitHookFile(Project project) {
         println("search and copy pre-push")
@@ -70,18 +70,20 @@ class MyLintPlugin implements Plugin<Project> {
 
     private void applyTask(Project project, DomainObjectSet<BaseVariant> variants) {
         project.dependencies {
+            //添加最新版的自定义lint依赖
             implementation("com.zpf.android:tool-lint:latest.integration") {
                 force = true
             }
         }
         project.configurations.all {
+            //设置缓存有效时长
             resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
         }
         def archonTaskExists = false
         variants.all { variant ->
             def variantName = variant.name.capitalize()
             LintBaseTask lintTask = project.tasks.getByName("lint" + variantName) as LintBaseTask
-            //Lint 会把project下的lint.xml和lintConfig指定的lint.xml进行合并，为了确保只执行插件中的规则，采取此策略
+            //通过lint.xml配置规则
             File lintFile = project.file("lint.xml")
             def lintOptions = lintTask.lintOptions
             lintOptions.lintConfig = lintFile
@@ -93,6 +95,7 @@ class MyLintPlugin implements Plugin<Project> {
             lintTask.doFirst {
                 hasCustomLint = lintFile.exists()
                 println("hasCustomLint=" + hasCustomLint)
+                //如果本地已有lint.xml配置文件则使用本地配置
                 if (!hasCustomLint) {
                     try {
                         InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/lint.xml")
@@ -106,12 +109,14 @@ class MyLintPlugin implements Plugin<Project> {
             }
             project.gradle.taskGraph.afterTask { task, TaskState state ->
                 if (task == lintTask) {
+                    //如果使用的插件中的规则，则检测结束后删除lint.xml
                     if (!hasCustomLint && lintFile != null && lintFile.exists()) {
                         lintFile.delete()
                     }
                 }
             }
             if (!archonTaskExists) {
+                //创建自定义task用于执行lint检测，此task会在gti hook中调用
                 archonTaskExists = true
                 println("create lintForArchon task")
                 project.task("lintForArchon").dependsOn lintTask

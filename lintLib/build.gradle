@@ -13,9 +13,3 @@ android {
 dependencies {
     lintPublish project(":lintrule")
 }
-
-//project.afterEvaluate {
-//    def assembleDebugTask = project.tasks.find { it.name == 'assembleDebug' }
-//    def lintTask = project.tasks.find { it.name == 'lintDebug' }
-//    assembleDebugTask.dependsOn(lintTask)
-//}

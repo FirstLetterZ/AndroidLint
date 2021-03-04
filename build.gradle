@@ -6,7 +6,7 @@ buildscript {
         google()
         maven { url 'https://dl.bintray.com/letterz/AndroidSupportMaven' }
         maven { url "https://jitpack.io" }
-        maven { url uri("repo") }
+        maven { url uri("repo") }//本地仓库地址
         jcenter()
         mavenCentral()
     }
