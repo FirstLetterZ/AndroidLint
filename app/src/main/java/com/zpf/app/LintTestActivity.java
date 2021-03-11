@@ -1,6 +1,7 @@
 package com.zpf.app;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,5 +15,6 @@ public class LintTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_test_lint);
         TestLint.check();
         //ceshi1
+        Log.e("tag","test");
     }
 }
