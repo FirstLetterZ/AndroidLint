@@ -13,5 +13,6 @@ public class LintTestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_lint);
         TestLint.check();
+        //ceshi1
     }
 }
