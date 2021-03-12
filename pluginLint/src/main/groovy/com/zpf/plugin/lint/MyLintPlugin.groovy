@@ -17,10 +17,10 @@ class MyLintPlugin implements Plugin<Project> {
         if (androidVariants != null) {
             applyTask(project, androidVariants)
         }
-        if (System.currentTimeMillis() - lastCheck > 600000) {
-            //检查git hook文件是否复制到了指定位置
-            checkGitHookFile(project)
-        }
+//        if (System.currentTimeMillis() - lastCheck > 600000) {
+        //检查git hook文件是否复制到了指定位置
+        checkGitHookFile(project)
+//        }
     }
 
     private static DomainObjectSet<BaseVariant> getAndroidVariants(Project project) {
@@ -42,27 +42,35 @@ class MyLintPlugin implements Plugin<Project> {
      * 查找并复制pre-push文件
      */
     private static void checkGitHookFile(Project project) {
-        println("search and copy pre-push")
-        def rootFile = project.getRootDir()
-        def gitFile = new File(rootFile, ".git")
-        if (!gitFile.exists()) {
-            gitFile = new File(rootFile.getParentFile(), ".git")
+        def projectDir = project.getProjectDir()
+        def gitFile = new File(projectDir, ".git")
+        while (!gitFile.exists()) {
+            projectDir = projectDir.getParentFile()
+            if (projectDir == null) {
+                break
+            }
+            gitFile = new File(projectDir, ".git")
         }
         println(".git file exists=" + gitFile.exists())
         if (gitFile.exists()) {
-            def prePushHookFile = new File(gitFile, "hooks/pre-push")
-            if (!prePushHookFile.exists() || prePushHookFile.length() == 0) {
-                println("start copy pre-push")
+            def hookFile = new File(gitFile, "hooks/pre-commit")
+            if (!hookFile.exists() || hookFile.length() == 0) {
+                println("start write git hook file===>")
                 try {
-                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/pre-push")
-                    OutputStream outputStream = new FileOutputStream(prePushHookFile)
-                    IOUtils.writeToFile(inputStream, outputStream)
-                    println("copy pre-push success")
+                    def head = "#!/bin/sh\ndriPath=\"" +
+                            project.getRootDir().absolutePath +
+                            "\"\nprojectName=\"" + project.name + "\"\n"
+                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/pre-commit")
+//                    OutputStream outputStream = new FileOutputStream(hookFile)
+//                    IOUtils.writeToFile(inputStream, outputStream)
+                    IOUtils.copyFile(head, inputStream, hookFile)
+                    println("create git hook file success")
                     lastCheck = System.currentTimeMillis()
                 } catch (Exception ignored) {
-                    println("copy pre-push failed!")
+                    println("create git hook file failed!==>" + ignored.message)
                 }
             } else {
+                println("file already exist:" + hookFile.getAbsolutePath())
                 lastCheck = System.currentTimeMillis()
             }
         }
@@ -118,7 +126,7 @@ class MyLintPlugin implements Plugin<Project> {
             if (!archonTaskExists) {
                 //创建自定义task用于执行lint检测，此task会在gti hook中调用
                 archonTaskExists = true
-                println("create lintForArchon task")
+                println("create lintForArchon task in project " + project.name)
                 project.task("lintForArchon").dependsOn lintTask
             }
         }

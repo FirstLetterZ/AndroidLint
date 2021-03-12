@@ -14,11 +14,11 @@ sourceSets {
     }
 }
 //发布到本地
-//uploadArchives {
-//    repositories.mavenDeployer {
-//        repository(url: uri('../repo'))
-//        pom.groupId = 'com.zpf.plugin'//包名
-//        pom.artifactId = 'android-check'//在需要引用插件时用到
-//        pom.version = '0.0.7'
-//    }
-//}
+uploadArchives {
+    repositories.mavenDeployer {
+        repository(url: uri('../../repo'))
+        pom.groupId = 'com.zpf.plugin'//包名
+        pom.artifactId = 'android-check'//在需要引用插件时用到
+        pom.version = '0.0.24'
+    }
+}

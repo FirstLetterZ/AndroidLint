@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.uast.UClass;
 import org.jetbrains.uast.UElement;
+import org.jetbrains.uast.UField;
 import org.jetbrains.uast.UMethod;
 import org.jetbrains.uast.visitor.AbstractUastVisitor;
 
@@ -77,6 +78,11 @@ public class NamingConventionDetector extends Detector implements Detector.UastS
             }
 
             return super.visitClass(node);
+        }
+
+        @Override
+        public boolean visitField(@NotNull UField node) {
+            return super.visitField(node);
         }
 
         @Override
