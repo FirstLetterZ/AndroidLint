@@ -1,0 +1,34 @@
+#driPath,projectName需要从外部写入
+fileName="lint.log"
+cd $driPath
+needLint=1
+currentDate=$(date "+%Y-%m-%d %H:%M:%S")
+timeStamp=$(date -d "$currentDate" +%s)
+echo $projectName" trigger hook at "$currentDate
+if [[ -r $fileName ]]; then
+  read lineData <$fileName
+  ##执行结果有2分钟的有效时间，避免不同的hook多次触发
+  if [[ ${lineData} -gt ${timeStamp}-120 && ${lineData} -le ${timeStamp} ]]; then
+    needLint=0
+  else
+    needLint=1
+  fi
+fi
+if [[ $needLint -eq 1 ]]; then
+  echo "will execute gradle lint task.check ${fileName} in folder ${driPath} for running result."
+  ./gradlew lintForArchon
+  if [ $? -eq 0 ]; then
+    echo "gradle task run successfully"
+    echo $timeStamp >${fileName}
+    echo "success" >>${fileName}
+    exit 0
+  else
+    echo "gradle task run failed"
+    echo "0" >${fileName}
+    echo "Failed to through the lint test(task lintForArchon)." >>${fileName}
+    echo "See lint-report/lint-report.html for more details." >>${fileName}
+    exit 1
+  fi
+else
+  echo "no need to execute gradle task"
+fi

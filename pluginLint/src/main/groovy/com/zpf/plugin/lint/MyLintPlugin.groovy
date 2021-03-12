@@ -10,6 +10,7 @@ import org.gradle.api.tasks.TaskState
 
 class MyLintPlugin implements Plugin<Project> {
     private static long lastCheck = 0L
+    private static String hookFileName = "pre-push"
 
     @Override
     void apply(Project project) {
@@ -17,10 +18,10 @@ class MyLintPlugin implements Plugin<Project> {
         if (androidVariants != null) {
             applyTask(project, androidVariants)
         }
-//        if (System.currentTimeMillis() - lastCheck > 600000) {
-        //检查git hook文件是否复制到了指定位置
-        checkGitHookFile(project)
-//        }
+        if (System.currentTimeMillis() - lastCheck > 600000) {
+            //检查git hook文件是否复制到了指定位置
+            checkGitHookFile(project)
+        }
     }
 
     private static DomainObjectSet<BaseVariant> getAndroidVariants(Project project) {
@@ -53,16 +54,14 @@ class MyLintPlugin implements Plugin<Project> {
         }
         println(".git file exists=" + gitFile.exists())
         if (gitFile.exists()) {
-            def hookFile = new File(gitFile, "hooks/pre-commit")
+            def hookFile = new File(gitFile, "hooks/" + hookFileName)
             if (!hookFile.exists() || hookFile.length() == 0) {
                 println("start write git hook file===>")
                 try {
                     def head = "#!/bin/sh\ndriPath=\"" +
                             project.getRootDir().absolutePath +
                             "\"\nprojectName=\"" + project.name + "\"\n"
-                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/pre-commit")
-//                    OutputStream outputStream = new FileOutputStream(hookFile)
-//                    IOUtils.writeToFile(inputStream, outputStream)
+                    InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/lint-hook")
                     IOUtils.copyFile(head, inputStream, hookFile)
                     println("create git hook file success")
                     lastCheck = System.currentTimeMillis()
