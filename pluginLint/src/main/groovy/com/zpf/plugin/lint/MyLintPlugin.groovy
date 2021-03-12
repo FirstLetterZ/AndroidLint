@@ -9,7 +9,6 @@ import org.gradle.api.*
 import org.gradle.api.tasks.TaskState
 
 class MyLintPlugin implements Plugin<Project> {
-    private static long lastCheck = 0L
     private static String hookFileName = "pre-push"
 
     @Override
@@ -18,10 +17,8 @@ class MyLintPlugin implements Plugin<Project> {
         if (androidVariants != null) {
             applyTask(project, androidVariants)
         }
-        if (System.currentTimeMillis() - lastCheck > 600000) {
-            //检查git hook文件是否复制到了指定位置
-            checkGitHookFile(project)
-        }
+        //检查git hook文件是否复制到了指定位置
+        checkGitHookFile(project)
     }
 
     private static DomainObjectSet<BaseVariant> getAndroidVariants(Project project) {
@@ -64,13 +61,11 @@ class MyLintPlugin implements Plugin<Project> {
                     InputStream inputStream = MyLintPlugin.class.getResourceAsStream("/config/lint-hook")
                     IOUtils.copyFile(head, inputStream, hookFile)
                     println("create git hook file success")
-                    lastCheck = System.currentTimeMillis()
                 } catch (Exception ignored) {
                     println("create git hook file failed!==>" + ignored.message)
                 }
             } else {
                 println("file already exist:" + hookFile.getAbsolutePath())
-                lastCheck = System.currentTimeMillis()
             }
         }
     }
